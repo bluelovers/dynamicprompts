@@ -55,7 +55,6 @@ class VariantCommand(Command):
     def adjust_range(self) -> VariantCommand:
         max_options = len(self.variants)
         min_bound = min(self.min_bound, max_options)
-        # max_bound = min(self.max_bound, max_options)
         max_bound = _fix_max_bound(self.max_bound, max_options)
         return dataclasses.replace(self, min_bound=min_bound, max_bound=max_bound)
 
