@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+from collections.abc import Sized
 from itertools import cycle
 from typing import Any, Iterable, TypeVar
 
