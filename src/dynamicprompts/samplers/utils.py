@@ -29,7 +29,6 @@ def wildcard_to_variant(
     values = context.wildcard_manager.get_values(wildcard)
     max_options = len(values)
     min_bound = min(min_bound, max_options)
-    # max_bound = min(max_bound, len(values))
     max_bound = _fix_max_bound(max_bound, max_options)
 
     variant_options = [
