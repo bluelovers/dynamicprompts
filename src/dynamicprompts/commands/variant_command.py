@@ -22,7 +22,7 @@ class VariantOption:
 class VariantCommand(Command):
     variants: list[VariantOption]
     min_bound: int = 1
-    max_bound: int = None
+    max_bound: int | None = None
     separator: str = ","
     sampling_method: SamplingMethod | None = None
 
