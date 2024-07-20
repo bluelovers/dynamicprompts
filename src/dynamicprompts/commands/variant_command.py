@@ -28,7 +28,7 @@ class VariantCommand(Command):
 
     def __post_init__(self):
         min_bound = self.min_bound
-        if self.max_bound:
+        if self.max_bound is not None:
             min_bound, max_bound = sorted((self.min_bound, self.max_bound))
             object.__setattr__(self, "max_bound", max_bound)
         min_bound = max(0, min_bound)
