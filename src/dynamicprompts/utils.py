@@ -99,6 +99,6 @@ def choose_without_replacement(
         return chosen_values
 
 
-def _fix_max_bound(max_bound: int | None, values: any | int) -> int:
+def _fix_max_bound(max_bound: int | None, values: Sized | int) -> int:
     max_options = values if isinstance(values, int) else len(values)
     return min(max_bound, max_options) if max_bound else max_options
