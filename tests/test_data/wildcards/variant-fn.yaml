@@ -1,0 +1,23 @@
+variant-fn:
+  prompts1:
+    - >-
+      __variant-fn/fn/test(v=!{fox|manatee})__
+      
+  fn:
+    test:
+      - >-
+        kawaii ${v} Cute ${v}
+    test2:
+      - >-
+        xxx ${v} yyy ${v}
+    test6:
+      - >-
+        666 ${v} 666 ${v}
+    test3:
+      - >-
+        __variant-fn/fn/test__
+        __variant-fn/fn/test2(v=222)__
+    test4:
+      - >-
+        __variant-fn/fn/test(v=111)__
+        __variant-fn/fn/test2__

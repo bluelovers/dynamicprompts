@@ -9,7 +9,7 @@ from dynamicprompts.enums import SamplingMethod
 @dataclasses.dataclass(frozen=True)
 class LiteralCommand(Command):
     literal: str
-    sampling_method: SamplingMethod | None = None
+    # sampling_method: SamplingMethod | None = None
 
     def __add__(self, other):
         if isinstance(other, LiteralCommand):

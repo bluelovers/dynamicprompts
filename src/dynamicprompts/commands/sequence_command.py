@@ -10,7 +10,7 @@ from dynamicprompts.commands import Command, LiteralCommand, SamplingMethod
 class SequenceCommand(Command):
     tokens: list[Command]
     separator: str = ""
-    sampling_method: SamplingMethod | None = None
+    # sampling_method: SamplingMethod | None = None
 
     def __len__(self) -> int:
         return len(self.tokens)

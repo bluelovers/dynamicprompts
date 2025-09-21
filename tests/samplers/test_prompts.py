@@ -429,12 +429,12 @@ class TestPrompts:
             random_choices = [
                 [
                     SequenceCommand.from_literals(
-                        [LiteralCommand("green "), variant],
+                        [LiteralCommand(literal="green "), variant],
                         sampling_method=SamplingMethod.RANDOM,
                     ),
                 ],
-                [LiteralCommand("circle", SamplingMethod.RANDOM)],
-                [LiteralCommand("red", SamplingMethod.RANDOM)],
+                [LiteralCommand(literal="circle", sampling_method=SamplingMethod.RANDOM)],
+                [LiteralCommand(literal="red", sampling_method=SamplingMethod.RANDOM)],
             ]
 
             with patch_random_sampler_variant_choices(random_choices):

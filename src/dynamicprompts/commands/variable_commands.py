@@ -9,13 +9,13 @@ from dynamicprompts.commands import Command
 class VariableAssignmentCommand(Command):
     name: str
     value: Command
-    immediate: bool
+    # immediate: bool
     overwrite: bool = True
-    sampling_method = None
+    # sampling_method = None
 
 
 @dataclasses.dataclass(frozen=True)
 class VariableAccessCommand(Command):
     name: str
     default: Command | None = None
-    sampling_method = None
+    # sampling_method = None

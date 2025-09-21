@@ -37,11 +37,11 @@ def wildcard_to_variant(
     ]
 
     wildcard_variant = VariantCommand(
-        variant_options,
-        min_bound,
-        max_bound,
-        separator,
-        command.sampling_method,
+        variants=variant_options,
+        min_bound=min_bound,
+        max_bound=max_bound,
+        separator=separator,
+        sampling_method=command.sampling_method,
     )
     return wildcard_variant
 

@@ -42,4 +42,4 @@ def split_wrapper_string(s: str) -> tuple[str, str]:
 class WrapCommand(Command):
     wrapper: Command
     inner: Command
-    sampling_method: SamplingMethod | None = None
+    # sampling_method: SamplingMethod | None = None

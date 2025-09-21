@@ -260,29 +260,33 @@ class TestParser:
         assert [v.literal for v in variant.values] == ["cat", "dog", "bird"]
 
     @pytest.mark.parametrize(
-        "input, min_bound, max_bound",
+        "input, min_bound, max_bound, max_bound2",
         [
-            ("{2$$cat|dog|bird}", 2, 2),
-            ("{1-2$$cat|dog|bird}", 1, 2),
-            ("{1-3$$cat|dog|bird}", 1, 3),
-            ("{-2$$cat|dog|bird}", 1, 2),
+            ("{2$$cat|dog|bird}", 2, 2, None),
+            ("{1-2$$cat|dog|bird}", 1, 2, None),
+            ("{1-3$$cat|dog|bird}", 1, 3, None),
+            ("{-2$$cat|dog|bird}", 1, 2, None),
             (
                 "{0-1$$a|b|c|d}",
                 0,
                 1,
+                None
             ),  # https://github.com/adieyal/sd-dynamic-prompts/issues/223
-            ("{!1-2$$cat|dog|bird}", 1, 2),
-            ("{~1-2$$cat|dog|bird}", 1, 2),
-            ("{2-$$cat|dog|bird}", 2, 3),
-            ("{0-$$cat|dog|bird}", 0, 3),
+            ("{!1-2$$cat|dog|bird}", 1, 2, None),
+            ("{~1-2$$cat|dog|bird}", 1, 2, None),
+            ("{2-$$cat|dog|bird}", 2, None, 3),
+            ("{0-$$cat|dog|bird}", 0, None, 3),
         ],
     )
-    def test_range(self, input, min_bound, max_bound):
+    def test_range(self, input, min_bound, max_bound, max_bound2: int):
         variant = parse(input)
         assert isinstance(variant, VariantCommand)
         assert variant.min_bound == min_bound
         assert variant.max_bound == max_bound
         assert variant.separator == ","
+
+        if max_bound2:
+            assert variant.adjust_range().max_bound == max_bound2
 
     def test_variant_delimiter(self):
         variant = parse("{2$$ and $$cat|dog|bird}")

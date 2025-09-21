@@ -6,8 +6,8 @@ from itertools import islice
 from random import Random
 from typing import TYPE_CHECKING, Iterable
 
-from dynamicprompts.commands import Command, LiteralCommand
-from dynamicprompts.commands.variable_commands import VariableAssignmentCommand
+from dynamicprompts.commands import Command, LiteralCommand, WildcardCommand, SequenceCommand
+from dynamicprompts.commands.variable_commands import VariableAssignmentCommand, VariableAccessCommand
 from dynamicprompts.constants import DEFAULT_RANDOM
 from dynamicprompts.enums import SamplingMethod
 from dynamicprompts.parser.config import ParserConfig, default_parser_config
@@ -42,6 +42,7 @@ class SamplingContext:
     parser_config: ParserConfig = default_parser_config
     rand: Random = DEFAULT_RANDOM
     variables: dict[str, Command] = dataclasses.field(default_factory=dict)
+    immediate_variables: dict[str, Command] = dataclasses.field(default_factory=dict)
 
     # Value for variables that aren't defined in the present context.
     # None will raise an error.
@@ -97,6 +98,39 @@ class SamplingContext:
 
     def generator_from_command(self, command: Command) -> ResultGen:
         samp, ctx = self.get_sampler_and_context(command)
+
+        # print("ctx.generator_from_command", command, "ctx", ctx, "samp", samp)
+
+        if isinstance(command, SequenceCommand) and len(ctx.variables) and not len(ctx.immediate_variables):
+
+            # print("ctx.variables", ctx.variables, command, samp, ctx)
+            immediate_variables = {**ctx.immediate_variables}
+
+            for sub_command in command.tokens:
+
+                if isinstance(sub_command, VariableAccessCommand) and not sub_command.name in immediate_variables:
+
+                    variable = sub_command.name
+                    command_to_sample = ctx.variables.get(variable, sub_command.default)
+
+                    if command_to_sample:
+                        if command_to_sample.immediate:
+                            # print("ctx.command_to_sample", command_to_sample)
+
+                            gen = samp._get_variable(sub_command, ctx)
+
+                            # print("ctx.gen", gen)
+
+                            command_to_sample = LiteralCommand(str(next(gen)))
+
+                            immediate_variables[variable] = command_to_sample
+                        else:
+                            immediate_variables[variable] = None
+
+            ctx = dataclasses.replace(ctx, immediate_variables=immediate_variables)
+
+            # print("ctx.immediate_variables.new", immediate_variables)
+
         return samp.generator_from_command(command, ctx)
 
     def sample_prompts(

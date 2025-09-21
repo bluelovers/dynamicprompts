@@ -92,7 +92,10 @@ class Sampler:
         context: SamplingContext,
     ) -> ResultGen:
         variable = command.name
-        command_to_sample = context.variables.get(variable, command.default)
+
+        command_to_sample = context.immediate_variables.get(variable, None)
+        if command_to_sample is None:
+            command_to_sample = context.variables.get(variable, command.default)
         if not command_to_sample:
             if context.unknown_variable_value is None:
                 raise KeyError(f"Variable {variable} is not defined in this context")

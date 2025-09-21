@@ -30,6 +30,7 @@ Note that whitespace is preserved in case it is significant to the user.
 
 from __future__ import annotations
 
+import dataclasses
 import re
 from functools import partial
 from typing import Iterable
@@ -326,19 +327,36 @@ def _parse_sampling_method(sampling_method_symbol: str | None) -> SamplingMethod
 def _parse_variable_spec(
     variable_spec: str,
     parser_config: ParserConfig,
-) -> Iterable[tuple[str, Command]]:
+) -> tuple[list[tuple[str, Command]], list[tuple[str, Command]]]:
     """
-    Parse a wildcard command's variable spec string to a variable->Command iterable.
+    Parse a wildcard command's variable spec string to a (pairs, immediate_names).
     """
+    pairs: list[tuple[str, Command]] = []
+    pairs_immediate_names: list[tuple[str, Command]] = []
     for pair in variable_spec.split(","):
-        key, _, value = pair.partition("=")
+        # First try to split by "=!"
+        key, sep, value = pair.partition("=!")
+        immediate: bool = sep == "=!"
+
+        # If no "=!" found, try regular "="
+        if not sep:
+            key, sep, value = pair.partition("=")
+            immediate = False
+
+        key = key.strip()
         value = value.strip()
+
         command: Command
         if value.isalnum():  # no need to bother...
             command = LiteralCommand(value)
         else:
             command = parse(value, parser_config=parser_config)
-        yield key.strip(), command
+
+        if immediate:
+            command = dataclasses.replace(command, immediate=True)
+            pairs_immediate_names.append((key, command))
+        pairs.append((key, command))
+    return pairs, pairs_immediate_names
 
 
 def _parse_wildcard_command(
@@ -353,10 +371,14 @@ def _parse_wildcard_command(
     sampling_method = _parse_sampling_method(sampling_method_symbol)
 
     variable_spec = parts.get("variable_spec")
+    immediate_variables: dict[str, Command] = dict()
     if variable_spec:
-        variables = dict(
-            _parse_variable_spec(variable_spec, parser_config=parser_config),
+        pairs, pairs_immediate_names = _parse_variable_spec(
+            variable_spec,
+            parser_config=parser_config,
         )
+        variables = dict(pairs)
+        immediate_variables = dict(pairs_immediate_names)
     else:
         variables = {}
 
@@ -367,6 +389,7 @@ def _parse_wildcard_command(
         wildcard=wildcard,
         sampling_method=sampling_method,
         variables=variables,
+        immediate_variables=immediate_variables,
     )
 
 
@@ -556,10 +579,15 @@ def parse(
     if prompt.isalnum():  # no need to actually parse anything
         return LiteralCommand(prompt)
 
-    tokens = get_cached_parser(parser_config).parse_string(
-        prompt,
-        parse_all=True,
-    )
+    try:
+        tokens = get_cached_parser(parser_config).parse_string(
+            prompt,
+            parse_all=True,
+        )
+    except Exception as e:
+        print(f"Error while parsing prompt {prompt!r}: {e}")
+        raise  # Re-raise the exception to continue triggering the error
+
     if len(tokens) != 1:
         raise ValueError(f"Could not parse prompt {prompt!r}")
 

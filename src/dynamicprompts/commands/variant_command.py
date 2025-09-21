@@ -24,7 +24,7 @@ class VariantCommand(Command):
     min_bound: int = 1
     max_bound: int | None = None
     separator: str = ","
-    sampling_method: SamplingMethod | None = None
+    # sampling_method: SamplingMethod | None = None
 
     def __post_init__(self):
         min_bound = self.min_bound
