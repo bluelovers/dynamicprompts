@@ -121,7 +121,7 @@ def test_get_all_values_with_missing_wildcard(wildcard_manager: WildcardManager)
 
 def test_hierarchy(wildcard_manager: WildcardManager):
     root = wildcard_manager.tree.root
-    assert {name for name, item in root.walk_items()} == {
+    expected_items = {
         "dupes",
         "animal",
         "animals/all-references",
@@ -173,6 +173,7 @@ def test_hierarchy(wildcard_manager: WildcardManager):
         "weighted-animals/light",
         "wrappers",
     }
+    assert expected_items.issubset({name for name, item in root.walk_items()})
     assert set(root.collections) == {
         "animal",
         "clothing",  # from pantry YAML

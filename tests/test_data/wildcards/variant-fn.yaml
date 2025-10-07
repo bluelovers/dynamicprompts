@@ -2,7 +2,12 @@ variant-fn:
   prompts1:
     - >-
       __variant-fn/fn/test(v=!{fox|manatee})__
-      
+  prompts2:
+    - >-
+      {1-$$__variant-fn/fn/test(v=!{fox|manatee})__, a}
+  prompts3:
+    - >-
+      {1-$$__variant-fn/prompts1__}
   fn:
     test:
       - >-

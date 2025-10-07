@@ -90,6 +90,22 @@ def test_variant_fn_003_immediate(wildcard_manager: WildcardManager):
     _lazy_test2(wildcard_manager, "__variant-fn/fn/test(v=!{fox|manatee})__",
                {"kawaii fox cute fox", "kawaii manatee cute manatee"}, "kawaii")
 
+
+def test_variant_fn_004_immediate(wildcard_manager: WildcardManager):
+    _lazy_test(wildcard_manager, "__variant-fn/prompts1__",
+                {"kawaii fox cute fox", "kawaii manatee cute manatee"}, "kawaii")
+
+
+def test_variant_fn_005_immediate(wildcard_manager: WildcardManager):
+    _lazy_test(wildcard_manager, "__variant-fn/prompts2__",
+                {"kawaii fox cute fox", "kawaii manatee cute manatee"}, "kawaii")
+
+
+# def test_variant_fn_006_immediate(wildcard_manager: WildcardManager):
+#     _lazy_test(wildcard_manager, "__variant-fn/prompts3__",
+#                 {"kawaii fox cute fox", "kawaii manatee cute manatee"}, "kawaii")
+
+
 def _lazy_test(wildcard_manager: WildcardManager, prompts: str, expected: set[str], startswith: str):
     cmd = parse(prompts)
     scon = SamplingContext(
