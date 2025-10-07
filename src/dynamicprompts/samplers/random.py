@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from random import Random
-from typing import Iterator
+from typing import Iterator, cast
 
 from dynamicprompts.commands import (
     Command,
@@ -65,24 +65,19 @@ class RandomSampler(Sampler):
         command: VariantCommand,
         context: SamplingContext,
     ) -> ResultGen:
-        if len(command.values) == 0:
+        if len(command.variants) == 0:
             return
-        elif len(command.values) == 1:
-            if isinstance(command.values[0], WildcardCommand):
-                wildcard_variant = wildcard_to_variant(
-                    command.values[0],
-                    context=context,
-                    min_bound=command.min_bound,
-                    max_bound=command.max_bound,
-                    separator=command.separator,
-                )
 
-                yield from self._get_variant(wildcard_variant, context)
+        if len(command.variants) == 1:
+            if isinstance(command.values[0], WildcardCommand):
+                wildcard_command = cast(WildcardCommand, command.values[0])
+                yield from self._get_variant_wildcard_to_variant(command, wildcard_command, context)
             else:
                 yield from context.generator_from_command(
                     command.values[0],
                 )
             return
+
         while True:
             command = command.adjust_range()
 

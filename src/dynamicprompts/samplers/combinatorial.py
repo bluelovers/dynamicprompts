@@ -98,35 +98,29 @@ class CombinatorialSampler(Sampler):
 
     def _get_variant(
         self,
-        variant_command: VariantCommand,
+        command: VariantCommand,
         context: SamplingContext,
     ) -> ResultGen:
-        if len(variant_command.variants) == 0:
+        if len(command.variants) == 0:
             return
 
-        seen = set()
-        is_wildcard_variant = len(variant_command.values) == 1 and isinstance(
-            variant_command.values[0],
+        is_wildcard_variant = len(command.variants) == 1 and isinstance(
+            command.values[0],
             WildcardCommand,
         )
 
         if is_wildcard_variant:
-            wildcard_command = cast(WildcardCommand, variant_command.values[0])
-            wildcard_variant = wildcard_to_variant(
-                wildcard_command,
-                context=context,
-                min_bound=variant_command.min_bound,
-                max_bound=variant_command.max_bound,
-                separator=variant_command.separator,
-            )
-            yield from self._get_variant(wildcard_variant, context)
+            wildcard_command = cast(WildcardCommand, command.values[0])
+            yield from self._get_variant_wildcard_to_variant(command, wildcard_command, context)
         else:
-            variant_command = variant_command.adjust_range()
+            seen = set()
+
+            command = command.adjust_range()
             for bound in range(
-                variant_command.min_bound,
-                variant_command.max_bound + 1,
+                command.min_bound,
+                    command.max_bound + 1,
             ):
-                for combo in variant_command.get_value_combinations(bound):
+                for combo in command.get_value_combinations(bound):
                     for prompt_arr in _combo_to_prompt(context, combo):
                         deduped_arr = dedupe(prompt_arr, key=lambda r: r.dedupe_key)
                         correct_size = len(deduped_arr) == bound
@@ -134,7 +128,7 @@ class CombinatorialSampler(Sampler):
                             seen.add(deduped_arr)
                             yield SamplingResult.joined(
                                 deduped_arr,
-                                separator=variant_command.separator,
+                                separator=command.separator,
                             )
 
     def _get_wildcard(

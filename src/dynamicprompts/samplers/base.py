@@ -14,6 +14,7 @@ from dynamicprompts.commands.variable_commands import (
     VariableAccessCommand,
     VariableAssignmentCommand,
 )
+from dynamicprompts.samplers.utils import wildcard_to_variant
 from dynamicprompts.sampling_context import SamplingContext
 from dynamicprompts.sampling_result import SamplingResult
 from dynamicprompts.types import ResultGen
@@ -66,6 +67,35 @@ class Sampler:
         context: SamplingContext,
     ) -> ResultGen:
         return self._unsupported_command(command)
+
+    def _get_variant_wildcard_to_variant(
+        self,
+        command: VariantCommand,
+        wildcard_command: WildcardCommand,
+        context: SamplingContext,
+    ) -> ResultGen:
+        """
+        将通配符命令转换为变体命令的内部实现方法
+
+        Args:
+            command (VariantCommand): 变体命令对象，包含最小/最大边界等参数
+            wildcard_command (WildcardCommand): 通配符命令对象
+            context (SamplingContext): 采样上下文信息
+
+        Returns:
+            ResultGen: 生成的变体结果迭代器
+
+        Note:
+            此方法是 _get_variant 的内部辅助方法
+        """
+        wildcard_variant = wildcard_to_variant(
+            wildcard_command,
+            context=context,
+            min_bound=command.min_bound,
+            max_bound=command.max_bound,
+            separator=command.separator,
+        )
+        return self._get_variant(wildcard_variant, context)
 
     def _get_sequence(
         self,
