@@ -88,6 +88,11 @@ class Sampler:
         Note:
             此方法是 _get_variant 的内部辅助方法
         """
+
+        # 修正变量作用域问题，确保通配符内部的变量可以正确访问
+        # 參考 test_fn_var_should_work_a01
+        context = context.with_variables(wildcard_command.variables)
+
         wildcard_variant = wildcard_to_variant(
             wildcard_command,
             context=context,
