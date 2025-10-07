@@ -1,0 +1,73 @@
+lazy-wildcards:
+  subject:
+    costume-elem-accessories:
+      zipper:
+        prompts:
+          - >-
+            __lazy-wildcards/subject/costume-elem-accessories/zipper/costume-elem-main__
+            {, {1-$$__lazy-wildcards/subject/costume-elem-accessories/zipper/costume-elem-zipper__}|}
+            {, {1-$$__lazy-wildcards/subject/costume-elem-accessories/zipper/action__}|}
+            {, {1-$$__lazy-wildcards/subject/costume-elem-accessories/zipper/costume-elem__}|}
+            {, {1-$$__lazy-wildcards/subject/costume-elem-accessories/zipper/style__}|}
+        costume-elem-main:
+          - zipper, zipper design
+        costume-elem-zipper:
+          - full-length zipper
+          - zipper pull tab
+          - front zipper
+          - breast zipper
+          - oversized zipper
+          - crotch zipper
+          - partially unzipped
+          - unzipped
+        action:
+          - unzipping
+          - unzipping another
+        costume-elem:
+          - center opening
+          - open fly
+          - unfastened
+          - zipper dress
+          - zipper skirt
+          - zipper pants
+          - zipper panties
+          - zipper leotard
+          - zipper bikini
+        style:
+          - __lazy-wildcards/utils/fn/made-of-inspired(v=zippers)__
+  utils:
+    fn:
+      # __lazy-wildcards/utils/fn/style-inspired(v=lego)__
+      style-inspired:
+        - >-
+          __lazy-wildcards/utils/fn/inspired__
+          , __lazy-wildcards/utils/fn/style-of__
+      style-of:
+        - >-
+          style of ${v}, ${v} style, ${v} \(style\)
+      inspired:
+        - >-
+          ${v}
+          , inspired by ${v}, ${v}-inspired, ${v}-inspired elements
+          , ${v} aesthetic, ${v} theme, ${v} setting
+          , ${v} fashion
+          , ${v} atmosphere
+      art:
+        - >-
+          ${v} artstyle, art by ${v}
+          , the art of ${v}
+      made-of-inspired:
+        - >-
+          __lazy-wildcards/utils/fn/inspired__
+          , made out of ${v}, made of ${v}
+      made-of:
+        - >-
+          ${v}
+          , made out of ${v}, made of ${v}
+      pattern-inspired:
+        - >-
+          __lazy-wildcards/utils/fn/pattern__
+          , __lazy-wildcards/utils/fn/inspired__
+      pattern:
+        - >-
+          ${v} print, ${v} pattern, ${v} \(pattern\), ${v}-shaped, ${v} sign
