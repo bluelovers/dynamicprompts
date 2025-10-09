@@ -32,3 +32,5 @@ def _lazy_test(wildcard_manager: WildcardManager, prompts: str):
         # print(f"prompt: {prompt}")
         seen.add(prompt)
     print(seen)
+
+    print(scon.wildcard_manager.get_all_used_collection())

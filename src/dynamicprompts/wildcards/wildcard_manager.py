@@ -48,6 +48,7 @@ class WildcardManager:
             self._root_map = root_map
         elif self._path:
             self._root_map = {"": [self._path]}
+        self._used_collection: set[WildcardCollection] = set()
 
     @property
     def sort_wildcards(self) -> bool:
@@ -167,6 +168,13 @@ class WildcardManager:
 
         return values
 
+    def get_all_used_collection(self):
+        return self._used_collection
+
+    def _add_used_collection(self, collection: WildcardCollection, wildcard: str = None) -> None:
+        # print(wildcard, collection.path())
+        self._used_collection.add(collection)
+
     def _get_values(self, wildcard: str) -> WildcardValues:
         """
         Get all wildcard values matching the given wildcard pattern.
@@ -176,12 +184,14 @@ class WildcardManager:
 
         values: list[str | WildcardItem] = []
         for f in self.match_collections(wildcard):
+            self._add_used_collection(f, wildcard)
             values.extend(f.get_values())
         if not values and not wildcard.startswith("**"):
             # If the wildcard doesn't match anything, try again with a recursive wildcard
             rec_wildcard = f"**/{wildcard}"
             rec_colls = list(self.match_collections(rec_wildcard))
             for f in rec_colls:
+                self._add_used_collection(f, rec_wildcard)
                 values.extend(f.get_values())
             if values:
                 logger.warning(

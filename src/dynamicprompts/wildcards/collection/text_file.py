@@ -24,6 +24,9 @@ class WildcardTextFile(WildcardCollection):
     def __repr__(self) -> str:
         return f"<TxtWildcardFile: {self._path}>"
 
+    def path(self) -> Path:
+        return self._path
+
     def get_values(self) -> list[str]:
         if self._cache is not None:
             return self._cache

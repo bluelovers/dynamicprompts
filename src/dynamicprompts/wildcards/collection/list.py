@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+from pathlib import Path
 from typing import Any, Sequence
 
 from dynamicprompts.wildcards.collection.base import WildcardCollection
@@ -19,7 +20,16 @@ class ListWildcardCollection(WildcardCollection):
     entries: Sequence[str | WildcardItem]
 
     # Implementation-specific hint for the source of the wildcards.
-    source: Any = None
+    source: tuple[Path, str | None] = None
+
+    def path(self) -> Path:
+        if self.source is None:
+            return None
+        return self.source[0]
+
+    def __hash__(self):
+        # 使用元组来确保可哈希性
+        return hash(("ListWildcardCollection", self.source))
 
     def get_values(self) -> Sequence[str | WildcardItem]:
         return self.entries

@@ -123,7 +123,7 @@ def parse_structured_file(file_path: Path) -> Iterable[tuple[str, WildcardCollec
             # Only return a collection if it's not empty.
             collection = ListWildcardCollection(
                 entries=valid_entries,
-                source=file_path,
+                source=(file_path, None),
             )
             return [(file_path.with_suffix("").name, collection)]
     return ()
