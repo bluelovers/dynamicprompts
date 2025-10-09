@@ -33,4 +33,4 @@ def _lazy_test(wildcard_manager: WildcardManager, prompts: str):
         seen.add(prompt)
     print(seen)
 
-    print(scon.wildcard_manager.get_all_used_collection())
+    print("Used wildcards:", scon.wildcard_manager.used_collection_dict().keys())

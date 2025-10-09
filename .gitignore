@@ -4,3 +4,4 @@
 dist
 /.coverage
 *.code-workspace
+/tests/test_temp*

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from fnmatch import fnmatch
+from pathlib import Path
 from typing import Iterable
 
 from dynamicprompts.wildcards.collection import WildcardCollection
@@ -47,3 +48,10 @@ class WildcardTree:
 
     def get_collection_names(self) -> Iterable[str]:
         return self.map.keys()
+
+    def get_collection_files(self):
+        files: set[Path] = set()
+        for coll in self.map.values():
+            files.add(coll.path())
+        return tuple(files)
+

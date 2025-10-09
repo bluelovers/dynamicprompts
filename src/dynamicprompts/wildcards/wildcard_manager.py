@@ -28,11 +28,14 @@ class WildcardManager:
         wildcard_wrap=default_parser_config.wildcard_wrap,
         *,
         root_map: RootMap | None = None,
+        extra_paths: Iterable[Path | str] | None = None,
     ) -> None:
         """
         Initialize a wildcard manager.
 
         You can pass in either a single Path to a directory, or a root map dictionary.
+
+        If extra_paths are specified, the paths will be added to the root map.
         """
         self._path: Path | None = Path(path) if path else None
         self._wildcard_wrap = wildcard_wrap
@@ -43,11 +46,20 @@ class WildcardManager:
         self.shuffle_wildcards = False
         self._root_map = {}
         if root_map:
-            if self._path:
+            if self._path or extra_paths:
                 raise ValueError("Cannot specify both path and roots")
             self._root_map = root_map
         elif self._path:
             self._root_map = {"": [self._path]}
+
+        if extra_paths:
+            extra_paths = list(set(extra_paths))
+            for _path in extra_paths:
+                if _path:
+                    _path = Path(_path)
+                    _key = _path.name if (_path.name not in self._root_map) else str(_path.absolute())
+                    self._root_map[_key] = [_path]
+
         self._used_collection: set[WildcardCollection] = set()
 
     @property
@@ -117,6 +129,9 @@ class WildcardManager:
             self._tree = build_tree_from_root_map(self._root_map)
         return self._tree
 
+    def get_loaded_files(self):
+        return self._tree.get_collection_files() if self._tree else None
+
     def clear_cache(self) -> None:
         """
         Clear the cache of the wildcard manager.
@@ -170,6 +185,15 @@ class WildcardManager:
 
     def get_all_used_collection(self):
         return self._used_collection
+
+    def used_collection_dict(self) -> dict[Path, set[WildcardCollection]]:
+        _dict = {}
+        for collection in self._used_collection:
+            path = collection.path() or ""
+            if path not in _dict:
+                _dict[path] = set()
+            _dict[path].add(collection)
+        return _dict
 
     def _add_used_collection(self, collection: WildcardCollection, wildcard: str = None) -> None:
         # print(wildcard, collection.path())

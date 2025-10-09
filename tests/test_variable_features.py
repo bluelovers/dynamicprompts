@@ -126,6 +126,8 @@ def _lazy_test(wildcard_manager: WildcardManager, prompts: str, expected: set[st
             break
     assert seen == expected
 
+    print("Used wildcards:", scon.wildcard_manager.used_collection_dict().keys())
+
 
 def _lazy_test2(wildcard_manager: WildcardManager, prompts: str, expected: set[str], startswith: str):
     cmd = parse(prompts)
@@ -146,3 +148,5 @@ def _lazy_test2(wildcard_manager: WildcardManager, prompts: str, expected: set[s
         if expected == seen or len(seen) >= my_len:
             break
     assert seen == expected
+
+    print("Used wildcards:", scon.wildcard_manager.used_collection_dict().keys())

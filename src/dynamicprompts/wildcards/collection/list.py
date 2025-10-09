@@ -28,8 +28,7 @@ class ListWildcardCollection(WildcardCollection):
         return self.source[0]
 
     def __hash__(self):
-        # 使用元组来确保可哈希性
-        return hash(("ListWildcardCollection", self.source))
+        return hash(("ListWildcardCollection", self.source or tuple(self.entries)))
 
     def get_values(self) -> Sequence[str | WildcardItem]:
         return self.entries
