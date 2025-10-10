@@ -138,6 +138,7 @@ class WildcardManager:
         """
         self._tree = None
         self._values_cache.clear()
+        self.clear_used_collection()
 
     def match_collections(self, wildcard: str) -> Iterable[WildcardCollection]:
         """
@@ -198,6 +199,9 @@ class WildcardManager:
     def _add_used_collection(self, collection: WildcardCollection, wildcard: str = None) -> None:
         # print(wildcard, collection.path())
         self._used_collection.add(collection)
+
+    def clear_used_collection(self) -> None:
+        self._used_collection.clear()
 
     def _get_values(self, wildcard: str) -> WildcardValues:
         """
