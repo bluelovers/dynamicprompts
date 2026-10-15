@@ -70,6 +70,7 @@ ignore = [
     "B028", # explicit stacklevel
     "B905",
     "C901", # Complexity
+    "COM812", # trailing comma, conflicts with ruff format
     "E501", # Line length
 ]
 unfixable = [
@@ -101,4 +102,9 @@ exclude_lines = [
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
     "if __name__ == .__main__.:",
+]
+
+[dependency-groups]
+dev = [
+    "ruff==0.3.3",
 ]
