@@ -79,7 +79,11 @@ def _parse_structured_file_dict(
             else:
                 yield (
                     name,
-                    ListWildcardCollection(entries=entries, source=(file_path, name)),
+                    ListWildcardCollection(
+                        entries=entries,
+                        source=(file_path, name),
+                        declared_key_path=prefix_and_name,
+                    ),
                 )
         elif isinstance(value, dict):
             yield from _parse_structured_file_dict(

@@ -6,6 +6,7 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable
 
+from dynamicprompts.diagnostics import assign_checked
 from dynamicprompts.wildcards.collection import WildcardCollection, WildcardTextFile
 from dynamicprompts.wildcards.collection.list import ListWildcardCollection
 from dynamicprompts.wildcards.collection.structured import parse_structured_file
@@ -66,12 +67,11 @@ def build_tree_from_path(root_path: Path) -> WildcardTree:
     for dirname, dirnames, filenames in os.walk(root_path, followlinks=True):
         dirnames[:] = [d for d in dirnames if not d.startswith(".")]
         for filename in filenames:
-            path_to_file.update(
-                _get_wildcard_collections_from_path(
-                    file_path=Path(dirname) / filename,
-                    root_path=root_path,
-                ),
-            )
+            for name, collection in _get_wildcard_collections_from_path(
+                file_path=Path(dirname) / filename,
+                root_path=root_path,
+            ):
+                assign_checked(path_to_file, name, collection, log=log)
     return WildcardTree.from_map(path_to_file)
 
 
@@ -81,7 +81,12 @@ def build_tree_from_root_map(root_map: RootMap) -> WildcardTree:
         for item in items:
             for name, collection_or_list in _mappingify_item(item).items():
                 collection = _collectionify(collection_or_list)
-                collection_map[combine_name_parts(root, name)] = collection
+                assign_checked(
+                    collection_map,
+                    combine_name_parts(root, name),
+                    collection,
+                    log=log,
+                )
     return WildcardTree.from_map(collection_map)
 
 
