@@ -99,6 +99,7 @@ class Sampler:
             min_bound=command.min_bound,
             max_bound=command.max_bound,
             separator=command.separator,
+            preserve_order=command.preserve_order,
         )
         return self._get_variant(wildcard_variant, context)
 

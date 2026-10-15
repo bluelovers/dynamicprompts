@@ -31,6 +31,7 @@ class RandomSampler(Sampler):
         weights: list[float],
         num_choices: int,
         rand: Random,
+        preserve_order: bool = False,
     ) -> list[Command]:
         # Wraps choose_without_replacement for ease of testing
 
@@ -39,6 +40,7 @@ class RandomSampler(Sampler):
             weights=weights,
             num_choices=num_choices,
             rand=rand,
+            preserve_order=preserve_order,
         )
 
     def _get_variant_num_choices(
@@ -91,6 +93,7 @@ class RandomSampler(Sampler):
                 weights=command.weights,
                 num_choices=num_choices,
                 rand=context.rand,
+                preserve_order=command.preserve_order,
             )
             sub_generators = [
                 context.generator_from_command(c) for c in selected_commands

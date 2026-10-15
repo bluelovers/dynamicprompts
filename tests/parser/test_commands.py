@@ -70,6 +70,45 @@ class TestVariant:
             for (a, b) in variant_command.get_value_combinations(2)
         ] == list(cross(ONE_TWO_THREE, ONE_TWO_THREE))
 
+    def test_combinations_preserve_order(self):
+        """preserve_order yields k-subsets only, in declaration order."""
+        variant_command = VariantCommand.from_literals_and_weights(ONE_TWO_THREE)
+
+        assert [
+            v.literal
+            for (v,) in variant_command.get_value_combinations(
+                1,
+                preserve_order=True,
+            )
+        ] == ONE_TWO_THREE
+
+        pairs = [
+            (a.literal, b.literal)
+            for (a, b) in variant_command.get_value_combinations(
+                2,
+                preserve_order=True,
+            )
+        ]
+
+        # C(3,2) = 3 subsets, not the 6 permutations of the default.
+        assert len(pairs) == 3
+        assert pairs == [("one", "two"), ("one", "three"), ("two", "three")]
+
+    def test_combinations_preserve_order_never_reverses(self):
+        variant_command = VariantCommand.from_literals_and_weights(ONE_TWO_THREE)
+
+        pairs = [
+            (a.literal, b.literal)
+            for (a, b) in variant_command.get_value_combinations(
+                2,
+                preserve_order=True,
+            )
+        ]
+        order = {value: i for i, value in enumerate(ONE_TWO_THREE)}
+
+        for first, second in pairs:
+            assert order[first] < order[second]
+
     def test_range(self):
         variant_command = VariantCommand.from_literals_and_weights(
             ONE_TWO_THREE,

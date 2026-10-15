@@ -5,7 +5,7 @@ A parser for a prompt grammar which is roughly as follows:
 <variant_prompt> ::= (<variant_chunk>)*
 <chunk> ::= <variable_assignment> | <variable_access> | <variants> | <wildcard> | <literal_sequence>
 <variant_chunk> ::= <variable_access> | <variants> | <wildcard> | <variant_literal_sequence>
-<variants> ::= <variant_start> <sampling_method>?(<bound><separator>?)? <variants_list>? <variant_end>
+<variants> ::= <variant_start> <sampling_method>? "^"? (<bound><separator>?)? <variants_list>? <variant_end>
 <variants_list> ::= <variant> ("|" <variant>)*
 <variant> ::= <weight>? <variant_prompt>
 <weight> ::= <real> | <integer>
@@ -209,6 +209,9 @@ def _configure_variants(
         variant_start
         + OPT_WS
         + pp.Opt(sampler_symbol)("sampling_method")
+        + OPT_WS
+        + pp.Opt(pp.Literal("^"))("preserve_order")
+        + OPT_WS
         + pp.Opt(bound_expr)("bound_expr")
         + OPT_WS
         + variants_list("variants")
@@ -291,6 +294,7 @@ def _parse_variant_command(parse_result: pp.ParseResults) -> VariantCommand:
 
     sampling_method_symbol = parts.get("sampling_method")
     sampling_method = _parse_sampling_method(sampling_method_symbol)
+    preserve_order = "preserve_order" in parts
 
     variants = [
         VariantOption(value=v["val"], weight=float(v["weight"][0]))
@@ -310,6 +314,7 @@ def _parse_variant_command(parse_result: pp.ParseResults) -> VariantCommand:
         max_bound=max_bound,
         separator=separator,
         sampling_method=sampling_method,
+        preserve_order=preserve_order,
     )
 
 

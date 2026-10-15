@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
+from itertools import combinations
 from typing import Generator, Iterable
 
 from dynamicprompts.commands.base import Command
@@ -24,6 +25,9 @@ class VariantCommand(Command):
     min_bound: int = 1
     max_bound: int | None = None
     separator: str = ","
+    # Declared with `^`: pick randomly, but emit the chosen options in the
+    # order they were declared rather than the order they were picked.
+    preserve_order: bool = False
     # sampling_method: SamplingMethod | None = None
 
     def __post_init__(self):
@@ -33,7 +37,6 @@ class VariantCommand(Command):
             object.__setattr__(self, "max_bound", max_bound)
         min_bound = max(0, min_bound)
         object.__setattr__(self, "min_bound", min_bound)
-
 
     def __len__(self) -> int:
         return len(self.variants)
@@ -84,14 +87,30 @@ class VariantCommand(Command):
         self,
         k: int,
         values=None,
+        *,
+        preserve_order: bool = False,
     ) -> Generator[list[Command], None, None]:
         if values is None:
             values = self.values
+
+        if preserve_order:
+            # Declaration order: enumerate k-subsets only, never permutations.
+            # `combinations` walks its input left to right, so every subset it
+            # yields is already in the order the options were declared.
+            if k <= 0:
+                yield []
+            else:
+                yield from (list(c) for c in combinations(values, k))
+            return
 
         if k <= 0:
             yield []
         else:
             for value in values:
                 other_values = [v for v in values if v != value]
-                for item in self.get_value_combinations(k - 1, values=other_values):
+                for item in self.get_value_combinations(
+                    k - 1,
+                    values=other_values,
+                    preserve_order=preserve_order,
+                ):
                     yield [value] + item

@@ -175,6 +175,48 @@ class TestParser:
         assert isinstance(variant, VariantCommand)
         assert variant.sampling_method == sampling_method
 
+    @pytest.mark.parametrize(
+        "input, preserve_order",
+        [
+            ("{red|green|blue}", False),
+            ("{2$$red|green|blue}", False),
+            ("{~2$$red|green|blue}", False),
+            ("{^red|green|blue}", True),
+            ("{^2$$red|green|blue}", True),
+            ("{~^2$$red|green|blue}", True),
+            ("{!^2$$red|green|blue}", True),
+            ("{@^2$$red|green|blue}", True),
+            ("{^1-3$$ and $$red|green|blue}", True),
+        ],
+    )
+    def test_variant_preserve_order(self, input, preserve_order):
+        variant = parse(input)
+        assert isinstance(variant, VariantCommand)
+        assert variant.preserve_order is preserve_order
+
+    def test_variant_preserve_order_with_surrounding_literals(self):
+        """The flag survives when the variant is nested in a sequence."""
+        command = parse("a {~^2$$red|green} b")
+        assert isinstance(command, SequenceCommand)
+
+        variant = command.tokens[1]
+        assert isinstance(variant, VariantCommand)
+        assert variant.preserve_order is True
+
+    def test_variant_preserve_order_does_not_leak_into_options(self):
+        """`^` is a modifier; it must not be swallowed by the bound expression."""
+        variant = parse("{~^2$$red|green|blue}")
+        assert isinstance(variant, VariantCommand)
+        assert (variant.min_bound, variant.max_bound) == (2, 2)
+        assert [v.literal for v in variant.values] == ["red", "green", "blue"]
+
+    def test_variant_preserve_order_still_allows_caret_in_options(self):
+        """A leading `^` opens the modifier; a caret mid-option stays literal."""
+        variant = parse("{a^b|c}")
+        assert isinstance(variant, VariantCommand)
+        assert variant.preserve_order is False
+        assert [v.literal for v in variant.values] == ["a^b", "c"]
+
     def test_variant_with_different_characters(self):
         variant = parse("{new york|washing-ton!|änder}")
         assert isinstance(variant, VariantCommand)
@@ -270,7 +312,7 @@ class TestParser:
                 "{0-1$$a|b|c|d}",
                 0,
                 1,
-                None
+                None,
             ),  # https://github.com/adieyal/sd-dynamic-prompts/issues/223
             ("{!1-2$$cat|dog|bird}", 1, 2, None),
             ("{~1-2$$cat|dog|bird}", 1, 2, None),

@@ -24,6 +24,7 @@ def wildcard_to_variant(
     min_bound=1,
     max_bound=1,
     separator=",",
+    preserve_order=False,
 ) -> VariantCommand:
     wildcard = next(iter(context.sample_prompts(command.wildcard, 1))).text
     values = context.wildcard_manager.get_values(wildcard)
@@ -42,6 +43,7 @@ def wildcard_to_variant(
         max_bound=max_bound,
         separator=separator,
         sampling_method=command.sampling_method,
+        preserve_order=preserve_order,
     )
     return wildcard_variant
 

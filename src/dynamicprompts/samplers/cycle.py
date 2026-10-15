@@ -74,7 +74,10 @@ class CyclicalSampler(Sampler):
             combinations = (
                 combo
                 for bound in range(command.min_bound, command.max_bound + 1)
-                for combo in command.get_value_combinations(bound)
+                for combo in command.get_value_combinations(
+                    bound,
+                    preserve_order=command.preserve_order,
+                )
             )
 
             combination_samplers = (

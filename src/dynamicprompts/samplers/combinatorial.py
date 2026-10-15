@@ -120,7 +120,10 @@ class CombinatorialSampler(Sampler):
                 command.min_bound,
                     command.max_bound + 1,
             ):
-                for combo in command.get_value_combinations(bound):
+                for combo in command.get_value_combinations(
+                    bound,
+                    preserve_order=command.preserve_order,
+                ):
                     for prompt_arr in _combo_to_prompt(context, combo):
                         deduped_arr = dedupe(prompt_arr, key=lambda r: r.dedupe_key)
                         correct_size = len(deduped_arr) == bound

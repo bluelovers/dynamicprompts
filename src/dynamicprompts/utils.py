@@ -69,6 +69,7 @@ def choose_without_replacement(
     weights: list[float],
     num_choices: int,
     rand=random,
+    preserve_order: bool = False,
 ) -> list[T]:
     values = values.copy()
     weights = weights.copy()
@@ -91,13 +92,22 @@ def choose_without_replacement(
     elif len(values) == 1:
         return values
     else:
-        chosen_values = []
+        # Carry each value's original position so that a preserve_order request
+        # can restore declaration order once the random picks are finished.
+        # Selecting by index (rather than by value) also keeps duplicate values
+        # from removing the wrong weight.
+        remaining = list(zip(values, range(len(values))))
+        chosen: list[tuple[int, T]] = []
         for _ in range(num_choices):
-            chosen = rand.choices(values, weights=weights, k=1)[0]
-            chosen_values.append(chosen)
-            weights.remove(weights[values.index(chosen)])
-            values.remove(chosen)
-        return chosen_values
+            index = rand.choices(range(len(remaining)), weights=weights, k=1)[0]
+            value, origin = remaining.pop(index)
+            chosen.append((origin, value))
+            weights.pop(index)
+
+        if preserve_order:
+            chosen.sort(key=lambda pair: pair[0])
+
+        return [value for _, value in chosen]
 
 
 def _fix_max_bound(max_bound: int | None, values: Sized | int) -> int:
