@@ -14,11 +14,46 @@ from dynamicprompts.wildcards.item import WildcardItem
 log = logging.getLogger(__name__)
 
 
+def _is_number(item: Any) -> bool:
+    """
+    Whether an item is a bare number.
+
+    YAML/JSON parse ``123`` and ``1.5`` as int/float rather than str, so they need
+    to be handled explicitly. ``bool`` is a subclass of ``int`` and must be
+    excluded, otherwise ``True`` would be treated as the number ``1``.
+    """
+    return isinstance(item, (int, float)) and not isinstance(item, bool)
+
+
+def _is_scalar(item: Any) -> bool:
+    """
+    Whether an item is a usable scalar: a string, or a bare number.
+
+    ``bool`` is excluded even though it is a subclass of ``int``.
+    """
+    return isinstance(item, str) or _is_number(item)
+
+
+def _scalar_to_text(item: Any) -> str:
+    """
+    Render a scalar item as text.
+
+    Strings pass through unchanged; numbers are stringified. Only call this for
+    items that passed :func:`_is_scalar`.
+    """
+    return item if isinstance(item, str) else str(item)
+
+
 def _parse_structured_file_list(value: list[Any]) -> Iterable[str | WildcardItem]:
     """
     Parse a single list in a structured file (JSON or YAML) and yield the wildcard items.
     """
     for item in value:
+        if _is_number(item):
+            # YAML/JSON parse bare numbers as int/float rather than str;
+            # treat them as string values so they are not dropped.
+            yield str(item)
+            continue
         if not item:
             continue
         if isinstance(item, str):
@@ -121,8 +156,8 @@ def parse_structured_file(file_path: Path) -> Iterable[tuple[str, WildcardCollec
     if isinstance(data, dict):
         return _parse_structured_file_dict(data, file_path=file_path)
     if isinstance(data, list):
-        # See if the data is a flat list of strings
-        valid_entries = [e for e in data if isinstance(e, str)]
+        # See if the data is a flat list of scalars (strings or numbers)
+        valid_entries = [_scalar_to_text(e) for e in data if _is_scalar(e)]
         if valid_entries:
             # Only return a collection if it's not empty.
             collection = ListWildcardCollection(
